@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: precificacao3d-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: precificacao3d
+      POSTGRES_USER: precificacao_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U precificacao_app -d precificacao3d"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: maven:3.9.11-eclipse-temurin-21
+    container_name: precificacao3d-app
+    working_dir: /app
+    volumes:
+      - .:/app
+      - maven_cache:/root/.m2
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/precificacao3d
+      SPRING_DATASOURCE_USERNAME: precificacao_app
+    ports:
+      - "8080:8080"
+    command: mvn spring-boot:run
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  maven_cache:
