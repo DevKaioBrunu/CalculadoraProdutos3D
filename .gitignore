@@ -1,1 +1,16 @@
+# Maven
+target/
+
+# Maven Wrapper - mantenha os arquivos versionados
+# Não ignore .mvn/wrapper/
+
+# IntelliJ IDEA
+.idea/
+
+# Variáveis de ambiente e segredos
 .env
+
+# Documentação pessoal
+agent-logs/
+Tasks/
+HELP.md

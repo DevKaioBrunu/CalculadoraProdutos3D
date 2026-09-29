@@ -1,2 +1,5 @@
-com/example/demo/DemoApplicationTests.class
 com/example/demo/CalculatorServiceTest.class
+com/example/demo/service/FilamentServiceTest.class
+com/example/demo/DemoApplicationTests.class
+com/example/demo/PostgresIntegrationTestSupport.class
+com/example/demo/controller/FilamentControllerIT.class
