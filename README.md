@@ -1,9 +1,8 @@
 # Calculadora de Produtos 3D
 
 Backend REST para calcular o custo e o preço de venda de produtos impressos em
-impressora 3D. O projeto está em fase inicial e atualmente oferece o cálculo
-manual de uma impressão; o cadastro de produtos, filamentos e uma interface web
-ainda serão implementados.
+impressora 3D. Atualmente oferece o cálculo manual de uma impressão, cadastro
+de filamentos e uma interface web simples para operação e testes.
 
 ## Tecnologias
 
@@ -68,7 +67,9 @@ curl -X POST http://localhost:8080/api/calculadora/precificar \
     "energyPricePerKwh": 1,
     "laborCost": 10,
     "otherCosts": 5,
-    "profitMarginPercentage": 50
+    "profitMarginPercentage": 50,
+    "filamentId": null,
+    "printerId": null
   }'
 ```
 
@@ -95,6 +96,90 @@ preço de venda = custo total × (1 + percentual de lucro / 100)
 > `profitMarginPercentage` funciona atualmente como um acréscimo sobre o
 > custo (markup). Ele ainda não representa margem sobre o preço final.
 
+Os campos `filamentId` e `printerId` são opcionais. Quando `filamentId` é
+informado, o valor cadastrado de `pricePerKg` tem precedência e
+`filamentPricePerKg` é ignorado. Da mesma forma, `printerId` usa a potência
+`powerWatts` cadastrada e ignora `printerPowerWatts`. Sem os IDs, os valores
+manuais continuam sendo usados.
+
+### Cadastro de filamentos
+
+A API de filamentos está disponível em `/api/filamentos`.
+
+#### Criar filamento
+
+```bash
+curl -X POST http://localhost:8080/api/filamentos \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "PLA Branco",
+    "brand": "Marca Teste",
+    "material": "PLA",
+    "color": "Branco",
+    "pricePerKg": 80.00
+  }'
+```
+
+Resposta `201 Created`:
+
+```json
+{
+  "id": 1,
+  "name": "PLA Branco",
+  "brand": "Marca Teste",
+  "material": "PLA",
+  "color": "Branco",
+  "pricePerKg": 80.00,
+  "createdAt": "2026-09-28T20:00:00",
+  "updatedAt": "2026-09-28T20:00:00"
+}
+```
+
+#### Listar filamentos
+
+```bash
+curl http://localhost:8080/api/filamentos
+```
+
+Resposta `200 OK`:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "PLA Branco",
+    "brand": "Marca Teste",
+    "material": "PLA",
+    "color": "Branco",
+    "pricePerKg": 80.00,
+    "createdAt": "2026-09-28T20:00:00",
+    "updatedAt": "2026-09-28T20:00:00"
+  }
+]
+```
+
+#### Buscar, atualizar e remover
+
+```bash
+curl http://localhost:8080/api/filamentos/1
+
+curl -X PUT http://localhost:8080/api/filamentos/1 \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "PLA Branco Atualizado",
+    "brand": "Marca Teste",
+    "material": "PLA",
+    "color": "Branco",
+    "pricePerKg": 85.50
+  }'
+
+curl -X DELETE http://localhost:8080/api/filamentos/1
+```
+
+Os endpoints de busca e atualização retornam `200 OK`; a remoção retorna
+`204 No Content`. Campos `name`, `brand` e `material` são obrigatórios, e
+`pricePerKg` deve ser maior que zero. Um ID inexistente retorna `404 Not Found`.
+
 ## Estado atual
 
 Implementado:
@@ -105,13 +190,14 @@ Implementado:
 - Arredondamento monetário para duas casas decimais.
 - Migration inicial da tabela de filamentos.
 - Teste unitário do cálculo principal.
+- API completa de cadastro, consulta, atualização e remoção de filamentos.
+- Testes de integração do CRUD com PostgreSQL real via Testcontainers.
 
 Ainda planejado:
 
-- API de cadastro e manutenção de filamentos.
 - Cadastro de impressoras e seus custos de energia/depreciação.
 - Cadastro de produtos e histórico de cálculos.
 - Detalhamento de desperdício, manutenção, acabamento, embalagem, impostos e
   taxas de venda.
 - Interface web para uso da calculadora.
-- Tratamento padronizado de erros e testes de integração.
+- Tratamento padronizado de erros.

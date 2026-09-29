@@ -8,108 +8,115 @@
 </head>
 <body>
 <header class="topbar">
-    <div>
-        <p class="eyebrow">Calculadora de Produtos 3D</p>
-        <h1>Precificação simples e prática</h1>
+    <div class="topbar-inner">
+        <div>
+            <p class="eyebrow">Oficina 3D</p>
+            <h1>Precificação</h1>
+        </div>
+        <span class="status"><span></span> API local</span>
     </div>
 </header>
 
 <main class="container">
     <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
 
-    <section class="card">
-        <div class="section-heading">
+    <nav class="tabs" aria-label="Seções da aplicação">
+        <button class="tab active" type="button" data-tab="calculator">Novo cálculo</button>
+        <button class="tab" type="button" data-tab="filaments">Filamentos</button>
+    </nav>
+
+    <section id="calculator" class="view active-view" data-view>
+        <div class="page-heading">
             <div>
-                <p class="eyebrow">Cálculo</p>
-                <h2>Calcular preço de venda</h2>
+                <p class="eyebrow">Cálculo manual</p>
+                <h2>Quanto cobrar por uma impressão?</h2>
+                <p class="intro">Informe os custos da peça e veja o preço sugerido na hora.</p>
             </div>
-            <span class="badge">POST /api/calculadora/precificar</span>
+            <span class="api-note">POST /api/calculadora/precificar</span>
         </div>
 
-        <form id="calculator-form" class="form-grid">
-            <label>Peso do filamento (g)
-                <input name="filamentWeightGrams" type="number" min="0" step="0.01" required value="100">
-            </label>
-            <label>Preço do filamento (R$/kg)
-                <input name="filamentPricePerKg" type="number" min="0" step="0.01" required value="80">
-            </label>
-            <label>Tempo de impressão (horas)
-                <input name="printTimeHours" type="number" min="0" step="0.01" required value="5">
-            </label>
-            <label>Potência da impressora (W)
-                <input name="printerPowerWatts" type="number" min="0" step="0.01" required value="200">
-            </label>
-            <label>Preço da energia (R$/kWh)
-                <input name="energyPricePerKwh" type="number" min="0" step="0.01" required value="1">
-            </label>
-            <label>Custo de mão de obra (R$)
-                <input name="laborCost" type="number" min="0" step="0.01" required value="0">
-            </label>
-            <label>Outros custos (R$)
-                <input name="otherCosts" type="number" min="0" step="0.01" required value="0">
-            </label>
-            <label>Markup (%)
-                <input name="profitMarginPercentage" type="number" min="0" step="0.01" required value="30">
-            </label>
-            <button class="button primary" type="submit">Calcular preço</button>
-        </form>
+        <div class="workspace">
+            <form id="calculator-form" class="panel form-grid">
+                <div class="form-section">
+                    <p class="form-title">Consumo</p>
+                    <div class="form-grid two-columns">
+                        <label>Peso do filamento <span>g</span>
+                            <input name="filamentWeightGrams" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="100,00">
+                        </label>
+                        <label>Preço do filamento <span>R$/kg</span>
+                            <input name="filamentPricePerKg" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="80,00">
+                        </label>
+                        <label>Tempo de impressão <span>horas</span>
+                            <input name="printTimeHours" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="5,00">
+                        </label>
+                        <label>Potência da impressora <span>W</span>
+                            <input name="printerPowerWatts" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="200,00">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <p class="form-title">Custos e markup</p>
+                    <div class="form-grid two-columns">
+                        <label>Preço da energia <span>R$/kWh</span>
+                            <input name="energyPricePerKwh" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="1,00">
+                        </label>
+                        <label>Mão de obra <span>R$</span>
+                            <input name="laborCost" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="0,00">
+                        </label>
+                        <label>Outros custos <span>R$</span>
+                            <input name="otherCosts" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="0,00">
+                        </label>
+                        <label>Markup <span>%</span>
+                            <input name="profitMarginPercentage" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required value="30,00">
+                        </label>
+                    </div>
+                </div>
+                <button id="calculator-submit" class="button primary submit-button" type="submit">Calcular preço</button>
+            </form>
 
-        <div id="calculation-result" class="result-grid hidden">
-            <div><span>Filamento</span><strong id="result-filament"></strong></div>
-            <div><span>Energia</span><strong id="result-energy"></strong></div>
-            <div><span>Custo total</span><strong id="result-total"></strong></div>
-            <div class="highlight"><span>Preço de venda</span><strong id="result-sale"></strong></div>
+            <aside id="calculation-result" class="panel result-panel" aria-live="polite">
+                <p class="eyebrow">Resultado</p>
+                <p class="result-label">Preço sugerido</p>
+                <strong id="result-sale" class="sale-price">R$ 0,00</strong>
+                <div class="result-breakdown">
+                    <div><span>Filamento</span><strong id="result-filament">R$ 0,00</strong></div>
+                    <div><span>Energia</span><strong id="result-energy">R$ 0,00</strong></div>
+                    <div><span>Custo total</span><strong id="result-total">R$ 0,00</strong></div>
+                </div>
+                <p class="result-hint">O markup é aplicado sobre o custo total.</p>
+            </aside>
         </div>
     </section>
 
-    <section class="card">
-        <div class="section-heading">
+    <section id="filaments" class="view" data-view hidden>
+        <div class="page-heading">
             <div>
-                <p class="eyebrow">Cadastro</p>
-                <h2>Filamentos</h2>
+                <p class="eyebrow">Materiais</p>
+                <h2>Filamentos cadastrados</h2>
+                <p class="intro">Mantenha seus preços organizados para os próximos cálculos.</p>
             </div>
             <button id="refresh-filaments" class="button secondary" type="button">Atualizar lista</button>
         </div>
 
-        <form id="filament-form" class="form-grid">
-            <input id="filament-id" type="hidden">
-            <label>Nome
-                <input id="filament-name" type="text" required>
-            </label>
-            <label>Marca
-                <input id="filament-brand" type="text" required>
-            </label>
-            <label>Material
-                <input id="filament-material" type="text" placeholder="PLA, ABS, PETG..." required>
-            </label>
-            <label>Cor
-                <input id="filament-color" type="text">
-            </label>
-            <label>Preço por kg (R$)
-                <input id="filament-price" type="number" min="0.01" step="0.01" required>
-            </label>
-            <div class="form-actions">
-                <button id="filament-submit" class="button primary" type="submit">Cadastrar filamento</button>
-                <button id="filament-cancel" class="button secondary hidden" type="button">Cancelar edição</button>
+        <div class="panel filament-panel">
+            <form id="filament-form" class="filament-form">
+                <input id="filament-id" type="hidden">
+                <label>Nome <input id="filament-name" type="text" required></label>
+                <label>Marca <input id="filament-brand" type="text" required></label>
+                <label>Material <input id="filament-material" type="text" placeholder="PLA, ABS, PETG..." required></label>
+                <label>Cor <input id="filament-color" type="text"></label>
+                <label>Preço por kg <span>R$</span><input id="filament-price" type="text" inputmode="decimal" pattern="[0-9]+([,][0-9]+)?" required></label>
+                <div class="form-actions">
+                    <button id="filament-submit" class="button primary" type="submit">Cadastrar filamento</button>
+                    <button id="filament-cancel" class="button secondary hidden" type="button">Cancelar</button>
+                </div>
+            </form>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Nome</th><th>Marca</th><th>Material</th><th>Cor</th><th>Preço/kg</th><th>Ações</th></tr></thead>
+                    <tbody id="filaments-body"><tr><td colspan="6" class="empty">Carregando filamentos...</td></tr></tbody>
+                </table>
             </div>
-        </form>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Marca</th>
-                    <th>Material</th>
-                    <th>Cor</th>
-                    <th>Preço/kg</th>
-                    <th>Ações</th>
-                </tr>
-                </thead>
-                <tbody id="filaments-body">
-                <tr><td colspan="6" class="empty">Carregando filamentos...</td></tr>
-                </tbody>
-            </table>
         </div>
     </section>
 </main>
